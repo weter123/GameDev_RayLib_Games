@@ -8,6 +8,26 @@ struct AnimData {
     float updateTime;
 };
 
+bool isOnGround(AnimData data, int windowHeight){
+    
+    return data.Pos.y >= windowHeight - data.Rec.height;
+   
+}
+
+AnimData updateAnimData(AnimData data, float dt ){
+    data.runningTime += dt;
+    if (data.runningTime >= data.updateTime){
+        data.runningTime = 0.0;
+        data.Rec.x = data.frame * data.Rec.width;          
+        data.frame++;
+        if(data.frame > 5){
+            data.frame = 0;
+        }
+    }
+    return data;
+
+}
+
 int main(){
 
     const int windowDimensions[2] = {512,380};
@@ -65,7 +85,9 @@ int main(){
         ClearBackground(WHITE);
 
         const float dt = GetFrameTime();
-        if (scarfyData.Pos.y >= windowDimensions[1] - scarfyData.Rec.height)
+
+        // Check if Scarfy is on ground or in air
+        if (isOnGround(scarfyData, windowDimensions[1]))
         {
             velocity =0;
             isInAir = false;
@@ -85,31 +107,14 @@ int main(){
             nebulae[i].Pos.x += nebVal * dt;
         }
 
-
-        // Scargy Frames update
-        
+        // Scargfy Frames update
         if(!isInAir){
-            scarfyData.runningTime += dt;
-            if (scarfyData.runningTime >= scarfyData.updateTime){
-                scarfyData.runningTime = 0.0;
-                scarfyData.Rec.x = scarfyData.frame * scarfyData.Rec.width;          
-                scarfyData.frame++;
-                if(scarfyData.frame > 5){
-                    scarfyData.frame = 0;
-                }
-            }
+           scarfyData = updateAnimData(scarfyData,dt);
         }
 
+        // Nebulae Frames update
         for (int i = 0; i < nebulaeSize; i++){
-            nebulae[i].runningTime += dt;
-            if (nebulae[i].runningTime >= nebulae[i].updateTime){
-                nebulae[i].runningTime = 0.0;
-                nebulae[i].Rec.x = nebulae[i].frame * nebulae[i].Rec.width;
-                nebulae[i].frame++;
-                if(nebulae[i].frame > 7){
-                    nebulae[i].frame  = 0;
-                }
-            }
+           nebulae[i] = updateAnimData(nebulae[i], dt);
         }
 
         // Draw Scarfy
